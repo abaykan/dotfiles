@@ -12,6 +12,30 @@ alias testssl="bash $HOME/tools/testssl.sh/testssl.sh"
 alias webroot="cd /var/www/html"
 alias jadx="flatpak run com.github.skylot.jadx"
 
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias reload="exec ${SHELL} -l"
+
+# Functions
+mkdir() { command mkdir -p "$@" && cd "$@"; }
+
+extract() {
+    case "$1" in
+        *.tar.bz2) tar xjf "$1" ;;
+        *.tar.gz)  tar xzf "$1" ;;
+        *.tar.xz)  tar xJf "$1" ;;
+        *.zip)     unzip "$1" ;;
+        *.7z)      7z x "$1" ;;
+        *)         echo "unknown format: $1" ;;
+    esac
+}
+
+path() { echo -e ${PATH//:/\\n}; }
+
+cekip() { curl -s ipconfig.io; }
+
 # PATH
 export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 export PATH="/usr/local/go/bin:$HOME/go/bin:$HOME/.pdtm/go/bin:$PATH"
@@ -23,6 +47,10 @@ export GEM_HOME="$HOME/.gems"
 export NVM_DIR="$HOME/nvm"
 export TERM=xterm-256color
 export PYTHONWARNINGS="ignore"
+export PYTHONIOENCODING='UTF-8'
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export EDITOR='nvim'
 
 # NVM
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"

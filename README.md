@@ -1,18 +1,39 @@
 # dotfiles
 
-My personal configuration files.
+Personal configuration files for zsh, kitty, nvim, and git.
 
 ## What's included
 
-- **shell/** - zsh + Oh My Zsh (minimal theme, autosuggestions, syntax-highlighting)
+- **.zshrc** - Shell config (Oh My Zsh, aliases, functions, PATH)
 - **kitty/** - Kitty terminal config + VSCode Dark theme
 - **nvim/** - Neovim config + custom VSCode Dark colorscheme
-- **git/** - Git config
+- **git/.gitconfig** - Git config
+- **bin/** - Custom scripts (openapi-checker.sh, googleapicheck)
+
+## Custom commands
+
+| Command | Function |
+|---------|----------|
+| `mkdir namafolder` | Create directory and enter it |
+| `cekip` | Check public IP via ipconfig.io |
+| `extract file.zip` | Universal extract (tar, zip, 7z, gz, xz) |
+| `path` | Show all PATH entries |
+| `reload` | Restart shell without closing terminal |
+
+### Aliases
+
+| Alias | Command |
+|-------|---------|
+| `..` | `cd ..` |
+| `...` | `cd ../..` |
+| `....` | `cd ../../..` |
+| `ll` | `ls -lah` |
+| `vim` | `nvim` |
 
 ## Install
 
 ```bash
-git clone https://github.com/abaykustirama/dotfiles.git
+git clone git@github.com:abaykan/dotfiles.git
 cd dotfiles
 chmod +x install.sh
 ./install.sh
