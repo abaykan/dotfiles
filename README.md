@@ -9,6 +9,7 @@ Personal configuration files for zsh, kitty, nvim, and git.
 - **nvim/** - Neovim config + custom VSCode Dark colorscheme
 - **git/.gitconfig** - Git config
 - **bin/** - Custom scripts (openapi-checker.sh, googleapicheck)
+- **gtk/gtk.css** - Dark theme for Nemo file manager (VSCode Dark)
 
 ## Custom commands
 

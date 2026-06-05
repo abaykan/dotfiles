@@ -50,6 +50,11 @@ mkdir -p "$HOME/bin"
 link "$DOTFILES_DIR/bin/openapi-checker.sh" "$HOME/bin/openapi-checker.sh"
 link "$DOTFILES_DIR/bin/googleapicheck" "$HOME/bin/googleapicheck"
 
+# GTK (Nemo file manager)
+echo "[gtk]"
+mkdir -p "$HOME/.config/gtk-3.0"
+link "$DOTFILES_DIR/gtk/gtk.css" "$HOME/.config/gtk-3.0/gtk.css"
+
 echo ""
 echo "Done. Restart your shell to apply changes."
 echo ""
