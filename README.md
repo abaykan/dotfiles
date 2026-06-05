@@ -47,4 +47,5 @@ Existing configs will be backed up to `~/.dotfiles-backup/`.
 - zsh + [Oh My Zsh](https://ohmyz.sh/)
 - [Kitty](https://sw.kovidgoyal.net/kitty/)
 - [Neovim](https://neovim.io/) + [vim-plug](https://github.com/junegunn/vim-plug)
+- [Nemo](https://github.com/linuxmint/nemo) file manager
 - git
