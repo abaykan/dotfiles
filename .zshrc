@@ -10,7 +10,7 @@ alias vim="nvim"
 alias humble="python3 $HOME/tools/humble/humble.py"
 alias testssl="bash $HOME/tools/testssl.sh/testssl.sh"
 alias webroot="cd /var/www/html"
-alias jadx="flatpak run com.github.skylot.jadx"
+
 
 # Navigation
 alias ..="cd .."
