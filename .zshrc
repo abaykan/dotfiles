@@ -19,7 +19,13 @@ alias ....="cd ../../.."
 alias reload="exec ${SHELL} -l"
 
 # Functions
-mkdir() { command mkdir -p "$@" && cd "$@"; }
+function mkdir() {
+    if [[ $# -eq 1 ]]; then
+        command mkdir -p "$1" && builtin cd "$1"
+    else
+        command mkdir -p "$@"
+    fi
+}
 
 extract() {
     case "$1" in
