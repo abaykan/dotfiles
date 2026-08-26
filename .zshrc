@@ -64,3 +64,10 @@ export EDITOR='nvim'
 
 # Cargo
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
+# bun completions
+[ -s "/home/abay/.bun/_bun" ] && source "/home/abay/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
