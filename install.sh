@@ -35,10 +35,24 @@ echo "[kitty]"
 link "$DOTFILES_DIR/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 link "$DOTFILES_DIR/kitty/current-theme.conf" "$HOME/.config/kitty/current-theme.conf"
 
-# Neovim
+# Neovim (LazyVim)
 echo "[nvim]"
-link "$DOTFILES_DIR/nvim/init.vim" "$HOME/.config/nvim/init.vim"
-link "$DOTFILES_DIR/nvim/colors/onedark-custom.vim" "$HOME/.config/nvim/colors/onedark-custom.vim"
+link "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"
+link "$DOTFILES_DIR/nvim/lazyvim.json" "$HOME/.config/nvim/lazyvim.json"
+link "$DOTFILES_DIR/nvim/.neoconf.json" "$HOME/.config/nvim/.neoconf.json"
+link "$DOTFILES_DIR/nvim/stylua.toml" "$HOME/.config/nvim/stylua.toml"
+mkdir -p "$HOME/.config/nvim/lua/config"
+link "$DOTFILES_DIR/nvim/lua/config/autocmds.lua" "$HOME/.config/nvim/lua/config/autocmds.lua"
+link "$DOTFILES_DIR/nvim/lua/config/keymaps.lua" "$HOME/.config/nvim/lua/config/keymaps.lua"
+link "$DOTFILES_DIR/nvim/lua/config/lazy.lua" "$HOME/.config/nvim/lua/config/lazy.lua"
+link "$DOTFILES_DIR/nvim/lua/config/options.lua" "$HOME/.config/nvim/lua/config/options.lua"
+mkdir -p "$HOME/.config/nvim/lua/lua/plugins"
+link "$DOTFILES_DIR/nvim/lua/lua/plugins/all-themes.lua" "$HOME/.config/nvim/lua/lua/plugins/all-themes.lua"
+link "$DOTFILES_DIR/nvim/lua/lua/plugins/disable-news-alert.lua" "$HOME/.config/nvim/lua/lua/plugins/disable-news-alert.lua"
+link "$DOTFILES_DIR/nvim/lua/lua/plugins/omakasui-theme-hotreload.lua" "$HOME/.config/nvim/lua/lua/plugins/omakasui-theme-hotreload.lua"
+link "$DOTFILES_DIR/nvim/lua/lua/plugins/snacks-animated-scrolling-off.lua" "$HOME/.config/nvim/lua/lua/plugins/snacks-animated-scrolling-off.lua"
+mkdir -p "$HOME/.config/nvim/plugin/after"
+link "$DOTFILES_DIR/nvim/plugin/after/transparency.lua" "$HOME/.config/nvim/plugin/after/transparency.lua"
 
 # Git
 echo "[git]"
