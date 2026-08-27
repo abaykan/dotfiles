@@ -6,7 +6,7 @@ Personal configuration files for zsh, kitty, nvim, and git.
 
 - **.zshrc** - Shell config (Oh My Zsh, aliases, functions, PATH)
 - **kitty/** - Kitty terminal config + VSCode Dark theme
-- **nvim/** - Neovim config + custom VSCode Dark colorscheme
+- **nvim/** - Neovim config (LazyVim + lazy.nvim)
 - **git/.gitconfig** - Git config
 - **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh)
 - **gtk/gtk.css** - Dark theme for Nemo file manager (VSCode Dark)
@@ -46,6 +46,6 @@ Existing configs will be backed up to `~/.dotfiles-backup/`.
 
 - zsh + [Oh My Zsh](https://ohmyz.sh/)
 - [Kitty](https://sw.kovidgoyal.net/kitty/)
-- [Neovim](https://neovim.io/) + [vim-plug](https://github.com/junegunn/vim-plug)
+- [Neovim](https://neovim.io/) + [LazyVim](https://www.lazyvim.org/)
 - [Nemo](https://github.com/linuxmint/nemo) file manager
 - git
