@@ -70,6 +70,24 @@ echo "[gtk]"
 mkdir -p "$HOME/.config/gtk-3.0"
 link "$DOTFILES_DIR/gtk/gtk.css" "$HOME/.config/gtk-3.0/gtk.css"
 
+# btop theme
+echo "[btop]"
+mkdir -p "$HOME/.config/btop/themes"
+link "$DOTFILES_DIR/btop/themes/serialchiller.theme" "$HOME/.config/btop/themes/serialchiller.theme"
+if [ -f "$HOME/.config/btop/btop.conf" ]; then
+    sed -i 's/^color_theme = .*/color_theme = "serialchiller"/' "$HOME/.config/btop/btop.conf"
+    echo "  set color_theme = serialchiller in btop.conf"
+fi
+
+# Omakub theme
+echo "[omakub]"
+if [ -d "$HOME/.config/omakub/themes" ]; then
+    link "$DOTFILES_DIR/omakub/themes/serialchiller" "$HOME/.config/omakub/themes/serialchiller"
+    echo "  apply with: omakub theme set serialchiller"
+else
+    echo "  omakub not found, skipped"
+fi
+
 echo ""
 echo "Done. Restart your shell to apply changes."
 echo ""

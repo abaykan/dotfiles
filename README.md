@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal configuration files for zsh, kitty, nvim, and git.
+Personal configuration files for zsh, kitty, nvim, git, btop, and omakub.
 
 ## What's included
 
@@ -10,6 +10,8 @@ Personal configuration files for zsh, kitty, nvim, and git.
 - **git/.gitconfig** - Git config
 - **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh)
 - **gtk/gtk.css** - Dark theme for Nemo file manager (VSCode Dark)
+- **btop/** - btop theme "serialchiller" (VSCode Dark palette)
+- **omakub/** - Omakub user theme "serialchiller" (VSCode Dark palette)
 
 ## Custom commands
 
@@ -42,10 +44,22 @@ chmod +x install.sh
 
 Existing configs will be backed up to `~/.dotfiles-backup/`.
 
+### Omakub theme (optional)
+
+After install, apply the serialchiller theme with:
+
+```bash
+omakub theme set serialchiller
+```
+
+Switch back anytime with `omakub theme set nord` (or any other theme).
+
 ## Prerequisites
 
 - zsh + [Oh My Zsh](https://ohmyz.sh/)
 - [Kitty](https://sw.kovidgoyal.net/kitty/)
 - [Neovim](https://neovim.io/) + [LazyVim](https://www.lazyvim.org/)
 - [Nemo](https://github.com/linuxmint/nemo) file manager
+- [btop](https://github.com/aristocratos/btop) (optional, for serialchiller theme)
+- [Omakub](https://omakub.org/) (optional, for serialchiller theme)
 - git
