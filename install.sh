@@ -29,6 +29,7 @@ echo ""
 # Shell
 echo "[shell]"
 link "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
+link "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 
 # Kitty
 echo "[kitty]"

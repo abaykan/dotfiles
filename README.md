@@ -4,7 +4,8 @@ Personal configuration files for zsh, kitty, nvim, git, btop, and omakub.
 
 ## What's included
 
-- **.zshrc** - Shell config (Oh My Zsh, aliases, functions, PATH)
+- **.zshrc** - Shell config (Oh My Zsh, Powerlevel10k, aliases, functions, PATH)
+- **zsh/.p10k.zsh** - Powerlevel10k prompt config (rainbow, Nerd Font icons)
 - **kitty/** - Kitty terminal config + VSCode Dark theme, plus `serialchiller.conf` (selectable via `kitty +kitten themes`)
 - **nvim/** - Neovim config (LazyVim + lazy.nvim)
 - **git/.gitconfig** - Git config
