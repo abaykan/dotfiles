@@ -1,99 +1,222 @@
 #!/usr/bin/env python3
-"""Google API Key Security Scanner"""
-
-import requests
-import warnings
+"""Google API Key Checker
+usage:
+  googleapicheck <API_KEY>
+  googleapicheck -f keys.txt
+"""
+import argparse
 import json
 import sys
-import time
+import urllib.request
+import urllib.error
+from concurrent.futures import ThreadPoolExecutor
 
-warnings.filterwarnings("ignore")
+UA = "Mozilla/5.0 (X11; Linux x86_64) googleapicheck/2.0"
 
-def scan(key):
-    banner = """       .-.      _______  
-      {}``; |==|_______D 
-      / ('        /|\     Google API Key 
-  (  /  |        / | \       Checker
-  \(_)_]]      /  |  \  
-          github.com/abaykan
-"""
-    tests = [
-        ("Custom Search",    "GET",  f"https://www.googleapis.com/customsearch/v1?cx=017576662512468239146:omuauf_lfve&q=lectures&key={key}", lambda r: "errors" not in r.text),
-        ("Static Map",       "GET",  f"https://maps.googleapis.com/maps/api/staticmap?center=45%2C10&zoom=7&size=400x400&key={key}", lambda r: r.status_code == 200),
-        ("Street View",      "GET",  f"https://maps.googleapis.com/maps/api/streetview?size=400x400&location=40.720032,-73.988354&fov=90&key={key}", lambda r: r.status_code == 200),
-        ("Directions",       "GET",  f"https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios&key={key}", lambda r: "error_message" not in r.text),
-        ("Geocoding",        "GET",  f"https://maps.googleapis.com/maps/api/geocode/json?latlng=40,30&key={key}", lambda r: "error_message" not in r.text),
-        ("Distance Matrix",  "GET",  f"https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=40.665,-73.891&destinations=40.690,-73.997&key={key}", lambda r: "error_message" not in r.text),
-        ("Find Place",       "GET",  f"https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Museum+Australia&inputtype=textquery&fields=name&key={key}", lambda r: "error_message" not in r.text),
-        ("Autocomplete",     "GET",  f"https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Bingh&types=%28cities%29&key={key}", lambda r: "error_message" not in r.text),
-        ("Elevation",        "GET",  f"https://maps.googleapis.com/maps/api/elevation/json?locations=39.739,-104.984&key={key}", lambda r: "error_message" not in r.text),
-        ("Timezone",         "GET",  f"https://maps.googleapis.com/maps/api/timezone/json?location=39.603,-119.682&timestamp=1331161200&key={key}", lambda r: "errorMessage" not in r.text),
-        ("Nearest Roads",    "GET",  f"https://roads.googleapis.com/v1/nearestRoads?points=60.170,24.942|60.170,24.942&key={key}", lambda r: "error" not in r.text),
-        ("Geolocation",      "POST", f"https://www.googleapis.com/geolocation/v1/geolocate?key={key}", lambda r: "error" not in r.text, {"json": {"considerIp": "true"}}),
-        ("Snap to Roads",    "GET",  f"https://roads.googleapis.com/v1/snapToRoads?path=-35.278,149.129|-35.280,149.129&interpolate=true&key={key}", lambda r: "error" not in r.text),
-        ("Speed Limit",      "GET",  f"https://roads.googleapis.com/v1/speedLimits?path=38.758,-9.037&key={key}", lambda r: "error" not in r.text),
-        ("Place Details",    "GET",  f"https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJN1t_tDeuEmsRUsoyG83frY4&fields=name&key={key}", lambda r: "error_message" not in r.text),
-        ("Nearby Search",    "GET",  f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.867,151.195&radius=100&types=food&key={key}", lambda r: "error_message" not in r.text),
-        ("Text Search",      "GET",  f"https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants+in+Sydney&key={key}", lambda r: "error_message" not in r.text),
-        ("Places Photo",     "GET",  f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CnRtAAAATLZNl354RwP_9UKbQ_5Psy40texXePv4oAlgP4qNEkdIrkyse7rPXYGd9D&key={key}", lambda r: r.status_code == 302, {"allow_redirects": False}),
-        ("FCM",              "POST", "https://fcm.googleapis.com/fcm/send", lambda r: r.status_code == 200, {"json": {"registration_ids": ["ABC"]}, "headers": {"Content-Type": "application/json", "Authorization": f"key={key}"}}),
-    ]
+# (name, url template with {key}, http method, body or None, binary response?)
+ENDPOINTS = [
+    ("Maps Geocoding",
+     "https://maps.googleapis.com/maps/api/geocode/json?address=jakarta&key={key}", "GET", None, False),
+    ("Maps Static Map",
+     "https://maps.googleapis.com/maps/api/staticmap?center=-6.2,106.8&zoom=12&size=400x400&key={key}", "GET", None, True),
+    ("Maps Street View",
+     "https://maps.googleapis.com/maps/api/streetview?location=-6.2,106.8&size=400x400&key={key}", "GET", None, True),
+    ("Maps Directions",
+     "https://maps.googleapis.com/maps/api/directions/json?origin=jakarta&destination=bandung&key={key}", "GET", None, False),
+    ("Maps Distance Matrix",
+     "https://maps.googleapis.com/maps/api/distancematrix/json?origins=jakarta&destinations=bandung&key={key}", "GET", None, False),
+    ("Maps Elevation",
+     "https://maps.googleapis.com/maps/api/elevation/json?locations=-6.2,106.8&key={key}", "GET", None, False),
+    ("Maps Timezone",
+     "https://maps.googleapis.com/maps/api/timezone/json?location=-6.2,106.8&timestamp=0&key={key}", "GET", None, False),
+    ("Places Text Search",
+     "https://maps.googleapis.com/maps/api/place/textsearch/json?query=coffee&key={key}", "GET", None, False),
+    ("Places Nearby Search",
+     "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.867,151.195&radius=100&key={key}", "GET", None, False),
+    ("Places Find Place",
+     "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=museum&inputtype=textquery&fields=name&key={key}", "GET", None, False),
+    ("Places Autocomplete",
+     "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=bing&types=(cities)&key={key}", "GET", None, False),
+    ("Places Details",
+     "https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJN1t_tDeuEmsRUsoyG83frY4&fields=name&key={key}", "GET", None, False),
+    ("Roads Snap to Roads",
+     "https://roads.googleapis.com/v1/snapToRoads?path=-35.278,149.129|-35.280,149.129&interpolate=true&key={key}", "GET", None, False),
+    ("Roads Nearest Roads",
+     "https://roads.googleapis.com/v1/nearestRoads?points=60.170,24.942|60.171,24.943&key={key}", "GET", None, False),
+    ("Roads Speed Limits",
+     "https://roads.googleapis.com/v1/speedLimits?path=38.758,-9.037&key={key}", "GET", None, False),
+    ("Geolocation",
+     "https://www.googleapis.com/geolocation/v1/geolocate?key={key}", "POST", '{"considerIp": true}', False),
+    ("Translate v2",
+     "https://translation.googleapis.com/language/translate/v2?q=hello&target=id&key={key}", "GET", None, False),
+    ("Generative Language (Gemini)",
+     "https://generativelanguage.googleapis.com/v1beta/models?key={key}", "GET", None, False),
+    ("YouTube Data v3",
+     "https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&maxResults=1&key={key}", "GET", None, False),
+    ("Drive v3 (public files)",
+     "https://www.googleapis.com/drive/v3/files?pageSize=1&key={key}", "GET", None, False),
+    ("Sheets v4 (public sheet)",
+     "https://sheets.googleapis.com/v4/spreadsheets/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms?fields=sheets.properties.title&key={key}", "GET", None, False),
+    ("Custom Search JSON",
+     "https://www.googleapis.com/customsearch/v1?q=test&key={key}", "GET", None, False),
+    ("Identity Toolkit (Firebase)",
+     "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={key}", "POST", "{}", False),
+]
 
-    vulns = []
-    total = len(tests)
-    masked = key[:8] + "*" * (len(key) - 12) + key[-4:]
+REASONS = {
+    "keyInvalid": "key invalid/deleted",
+    "API_KEY_SERVICE_BLOCKED": "key blocked by Google",
+    "API_KEY_INVALID": "key invalid",
+    "SERVICE_DISABLED": "key VALID, API disabled",
+    "PERMISSION_DENIED": "key restricted (referrer/IP/API)",
+    "refererBlocked": "key restricted by HTTP referrer",
+    "ipRefererBlocked": "key restricted by IP/referrer",
+    "REQUEST_DENIED": "request denied",
+    "QUOTA_EXCEEDED": "key VALID, quota exceeded",
+    "rateLimitExceeded": "key VALID, rate limited",
+    "dailyLimitExceeded": "key VALID, daily limit exceeded",
+    "usageLimits": "key VALID, usage limit hit",
+    "badKey": "bad key",
+}
 
-    print()
-    print(banner)
-    print("Google API Key Scanner")
-    print("-" * 40)
-    print(f"key:   {masked}")
-    print(f"len:   {len(key)} chars")
-    print("-" * 40)
-    print()
 
-    for i, (name, method, url, check, *extra) in enumerate(tests, 1):
-        extra = extra[0] if extra else {}
-        sys.stdout.write(f"\r[{i}/{total}] {name:<20}")
-        sys.stdout.flush()
+def clean_msg(s, limit=90):
+    # strip "Learn more" / console links, collapse whitespace, truncate
+    for sep in ("Learn more:", "learn more:", "Enable it by visiting"):
+        if sep in s:
+            s = s.split(sep)[0].rstrip()
+    return " ".join(s.split())[:limit]
 
+
+def classify(name, url, method, body, is_binary, key):
+    full_url = url.replace("{key}", key)
+    data = body.encode() if body else None
+    headers = {"User-Agent": UA, "Content-Type": "application/json"}
+    req = urllib.request.Request(full_url, data=data, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=15) as r:
+            code = r.getcode()
+            raw = r.read()
+            if is_binary:
+                ok = code == 200 and len(raw) > 1000  # image payload
+                return name, "VULN" if ok else f"HTTP {code}", f"200 OK, {len(raw)} bytes", full_url
+            try:
+                j = json.loads(raw)
+            except Exception:
+                return name, "VULN" if code == 200 else f"HTTP {code}", "200 OK", full_url
+            # 200 but JSON may carry status field (maps legacy)
+            st = j.get("status", "")
+            if st == "OK":
+                return name, "VULN", "200 OK", full_url
+            if st:  # REQUEST_DENIED etc.
+                msg = j.get("error_message", st)
+                return name, "DENIED", clean_msg(f"{st} - {msg}"), full_url
+            return name, "VULN", "200 OK", full_url
+    except urllib.error.HTTPError as e:
+        raw = e.read()
         try:
-            if method == "POST":
-                r = requests.post(url, verify=False, timeout=10, **extra)
+            j = json.loads(raw)
+            err = j.get("error", {})
+            status = err.get("status", "")
+            reason = ""
+            for fe in err.get("errors", []) or []:
+                reason = fe.get("reason", "")
+                break
+            label = REASONS.get(reason) or REASONS.get(status) or status or f"HTTP {e.code}"
+            detail = clean_msg(err.get("message", ""))
+            if "API key not valid" in detail or "keyInvalid" in (reason, status):
+                flag, label = "INVALID", "key invalid"
+            elif reason == "SERVICE_DISABLED" or "has not been used" in detail or "not been enabled" in detail:
+                flag = "VALID"  # key itself works, API just disabled
+            elif "PERMISSION_DENIED" in status or reason in ("ipRefererBlocked", "refererBlocked"):
+                flag = "VALID"  # valid but restricted
+            elif "VALID" in label:
+                flag = "VALID"
             else:
-                r = requests.get(url, verify=False, timeout=10, **extra)
+                flag = "DENIED"
+            return name, flag, f"[{reason or status}] {label} - {detail}", full_url
+        except Exception:
+            return name, f"HTTP {e.code}", raw[:120].decode("utf-8", "replace"), full_url
+    except Exception as e:
+        return name, "ERR", str(e)[:120], full_url
 
-            is_vuln = check(r)
-            label = "VULN" if is_vuln else "NOT VULN"
-            sys.stdout.write(f"\r[{i}/{total}] {name:<20} {label}\n")
 
-            if is_vuln:
-                vulns.append(name)
-        except:
-            sys.stdout.write(f"\r[{i}/{total}] {name:<20} err\n")
+def check_key(key):
+    masked = key[:8] + "*" * (len(key) - 12) + key[-4:]
+    results = []
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        futs = [ex.submit(classify, *ep, key) for ep in ENDPOINTS]
+        results = [f.result() for f in futs]
 
-        time.sleep(0.05)
+    vulns = [r for r in results if r[1] == "VULN"]
+    others = [r for r in results if r[1] != "VULN"]
 
-    print()
-    print("-" * 40)
+    print(f"\n{'=' * 62}")
+    print(f"  Google API Key Checker")
+    print(f"  key: {masked}  ({len(key)} chars, {len(ENDPOINTS)} endpoints)")
+    print(f"{'=' * 62}\n")
+
     if vulns:
-        print(f"{len(vulns)} vulnerable API(s) found:")
+        print(f"  VULNERABLE ({len(vulns)})\n  {'-' * 58}")
+        for name, flag, detail, url in vulns:
+            print(f"  \033[92m[+]\033[0m {name}  \033[90m({detail})\033[0m")
+            print(f"      {url}")
         print()
-        for name in vulns:
-            print(f"  * {name}")
+
+    if others:
+        print(f"  NOT VULNERABLE ({len(others)})\n  {'-' * 58}")
+        for name, flag, detail, url in others:
+            if flag == "INVALID":
+                mark, note = "\033[90m[-]\033[0m", "key invalid"
+            elif flag == "VALID":
+                mark, note = "\033[93m[~]\033[0m", "valid, restricted/disabled"
+            else:
+                mark, note = "\033[90m[ ]\033[0m", clean_note(detail)
+            print(f"  {mark} {name:<32} {note}")
+        print()
+
+    print(f"{'=' * 62}")
+    if vulns:
+        print(f"  \033[92m{len(vulns)} vulnerable API(s)\033[0m — URLs di atas siap dipake sebagai evidence")
     else:
-        print("all clean, 0 vulnerable APIs")
-    print()
-    print("pricing: https://cloud.google.com/maps-platform/pricing")
-    print("-" * 40)
-    print()
+        print(f"  0 vulnerable APIs")
+    print(f"{'=' * 62}\n")
+
+
+def clean_note(s, limit=30):
+    # short human note dari error detail
+    s = s.split(" - ")[-1]
+    for word in (("not activated", "API disabled"), ("not enabled", "API disabled"),
+                 ("blocked", "blocked"), ("ADMIN_ONLY", "admin-only op"),
+                 ("not valid", "key invalid"), ("not been used", "API disabled"),
+                 ("REQUEST_DENIED", "denied")):
+        if word[0] in s:
+            return word[1]
+    return s[:limit]
+
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] in ["-h", "--help"]:
-        print("usage: googleapicheck <API_KEY>")
-        sys.exit(0 if sys.argv[1:] else 1)
+    ap = argparse.ArgumentParser(description="Google API Key Checker")
+    ap.add_argument("key", nargs="?", help="API key AIza...")
+    ap.add_argument("-f", "--file", help="file with keys, one per line")
+    args = ap.parse_args()
 
-    scan(sys.argv[1])
+    keys = []
+    if args.key:
+        keys.append(args.key.strip())
+    if args.file:
+        with open(args.file) as fh:
+            keys += [l.strip() for l in fh if l.strip().startswith("AIza")]
+    if not keys:
+        ap.print_help()
+        sys.exit(1)
+
+    for k in keys:
+        if not k.startswith("AIza"):
+            print(f"[-] skip, bukan format API key: {k[:20]}")
+            continue
+        check_key(k)
+
 
 if __name__ == "__main__":
     main()
