@@ -1,3 +1,3 @@
 # macchina config
 theme = "serialchiller"
-show = ["Host", "Machine", "Kernel", "Distribution", "OperatingSystem", "DesktopEnvironment", "WindowManager", "Packages", "Shell", "Terminal", "Resolution", "Uptime", "Processor", "ProcessorLoad", "Memory", "GPU"]
+show = ["Host", "Kernel", "Packages", "LocalIP", "Uptime", "Memory"]

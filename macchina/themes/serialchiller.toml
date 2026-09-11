@@ -25,14 +25,14 @@ visible         = true
 
 [box.inner_margin]
 x               = 2
-y               = 1
+y               = 0
 
 [randomize]
 key_color       = false
 separator_color = false
 
 [custom_ascii]
-color           = "#3b8eea"
+path            = "~/development/dotfiles/macchina/ascii/logo.ascii"
 
 [keys]
 host            = "Host"
