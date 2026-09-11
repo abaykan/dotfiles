@@ -13,6 +13,7 @@ Personal configuration files for zsh, kitty, nvim, git, btop, and omakub.
 - **gtk/gtk.css** - Dark theme for Nemo file manager (VSCode Dark)
 - **btop/** - btop theme "serialchiller" (VSCode Dark palette)
 - **omakub/** - Omakub user theme "serialchiller" (VSCode Dark palette)
+- **macchina/** - Macchina system info theme "serialchiller" + default config
 
 ## Custom commands
 

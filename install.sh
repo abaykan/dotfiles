@@ -91,6 +91,16 @@ else
     echo "  omakub not found, skipped"
 fi
 
+# Macchina
+echo "[macchina]"
+if command -v macchina >/dev/null 2>&1; then
+    mkdir -p "$HOME/.config/macchina/themes"
+    link "$DOTFILES_DIR/macchina/macchina.toml" "$HOME/.config/macchina/macchina.toml"
+    link "$DOTFILES_DIR/macchina/themes/serialchiller.toml" "$HOME/.config/macchina/themes/serialchiller.toml"
+else
+    echo "  macchina not found, skipped"
+fi
+
 echo ""
 echo "Done. Restart your shell to apply changes."
 echo ""
